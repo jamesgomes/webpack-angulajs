@@ -85,7 +85,7 @@ module.exports = function makeWebpackConfig() {
       // Transpile .js files using babel-loader
       // Compiles ES6 and ES7 into ES5 code
       test: /\.js$/,
-      loader: 'babel-loader',
+      use: [{ loader: 'babel-loader' }],
       exclude: /node_modules/
     }, {
       // CSS LOADER
@@ -132,16 +132,13 @@ module.exports = function makeWebpackConfig() {
   // Skips node_modules and files that end with .spec.js
   if (isTest) {
     config.module.rules.push({
-      enforce: 'pre',
-      test: /\.js$/,
-      exclude: [
-        /node_modules/,
-        /\.spec\.js$/
-      ],
-      loader: 'istanbul-instrumenter-loader',
-      query: {
-        esModules: true
-      }
+      test: /\.js$|\.jsx$/,
+      use: {
+        loader: 'istanbul-instrumenter-loader',
+        options: { esModules: true }
+      },
+      enforce: 'post',
+      exclude: /node_modules|\.spec\.js$/,
     })
   }
 
@@ -196,7 +193,9 @@ module.exports = function makeWebpackConfig() {
 
       // // Reference: http://webpack.github.io/docs/list-of-plugins.html#uglifyjsplugin
       // // Minify all javascript, switch loaders to minimizing mode
-      new webpack.optimize.UglifyJsPlugin(),
+      new webpack.optimize.UglifyJsPlugin({
+        sourceMap: true
+      }),
 
       // Copy assets from the public folder
       // Reference: https://github.com/kevlened/copy-webpack-plugin

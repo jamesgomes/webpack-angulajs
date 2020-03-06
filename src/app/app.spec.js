@@ -14,6 +14,7 @@ describe('app', () => {
     });
 
     it('should contain the starter url', () => {
+      console.log('Arquivo de teste');
       expect(ctrl.url).toBe('https://github.com/preboot/angular-webpack');
     });
   });

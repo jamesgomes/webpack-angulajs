@@ -102,8 +102,8 @@ module.exports = function makeWebpackConfig() {
       // Use style-loader in development.
 
       loader: isTest ? 'null-loader' : ExtractTextPlugin.extract({
-        fallbackLoader: 'style-loader',
-        loader: [
+        fallback: 'style-loader',
+        use: [
           { loader: 'css-loader', query: { sourceMap: true } },
           { loader: 'postcss-loader' }
         ],
@@ -189,26 +189,21 @@ module.exports = function makeWebpackConfig() {
     config.plugins.push(
       // Reference: http://webpack.github.io/docs/list-of-plugins.html#noerrorsplugin
       // Only emit files when there are no errors
-      new webpack.NoEmitOnErrorsPlugin(),
+      // new webpack.NoEmitOnErrorsPlugin(),
 
-      // // Reference: http://webpack.github.io/docs/list-of-plugins.html#uglifyjsplugin
-      // // Minify all javascript, switch loaders to minimizing mode
-      new webpack.optimize.UglifyJsPlugin({
-        sourceMap: true
-      }),
+      // // // Reference: http://webpack.github.io/docs/list-of-plugins.html#uglifyjsplugin
+      // // // Minify all javascript, switch loaders to minimizing mode
+      // new webpack.optimize.UglifyJsPlugin({
+      //   sourceMap: true
+      // }),
 
       // Copy assets from the public folder
       // Reference: https://github.com/kevlened/copy-webpack-plugin
-      // new CopyWebpackPlugin([{
-      //   from: __dirname + '/src/public'
-      // }])
-      // new CopyPlugin([
-      //   {
-      //     from: 'src/public/**/*',
-      //     to: 'dest/',
-      //     force: true,
-      //   },
-      // ]),
+      new CopyPlugin([
+        {
+          from: 'src/public/img', to: 'dist'
+        },
+      ]),
     )
   }
 

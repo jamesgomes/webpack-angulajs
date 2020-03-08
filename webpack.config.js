@@ -1,20 +1,20 @@
 'use strict';
 
 // Modules
-var webpack = require('webpack');
-var autoprefixer = require('autoprefixer');
-var HtmlWebpackPlugin = require('html-webpack-plugin');
-var ExtractTextPlugin = require('extract-text-webpack-plugin');
+const webpack = require('webpack');
+const autoprefixer = require('autoprefixer');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
-var CleanWebpackPlugin = require('clean-webpack-plugin');
+const CleanWebpackPlugin = require('clean-webpack-plugin');
 
 /**
  * Env
  * Busca o clico de vida no NPM para identificar o ambiente.
  */
-var ENV = process.env.npm_lifecycle_event;
-var isTest = ENV === 'test' || ENV === 'test-watch';
-var isProd = ENV === 'build';
+const ENV = process.env.npm_lifecycle_event;
+const isTest = ENV === 'test' || ENV === 'test-watch';
+const isProd = ENV === 'build';
 
 module.exports = function makeWebpackConfig() {
   /**
@@ -22,7 +22,11 @@ module.exports = function makeWebpackConfig() {
    * Reference: http://webpack.github.io/docs/configuration.html
    * Este é o objeto em que toda a configuração é definida
    */
-  var config = {};
+  var config = {
+    plugins: [new MiniCssExtractPlugin()],
+  };
+
+  config.mode = isProd ? 'production' : 'development';
 
   /**
    * Entry
@@ -88,26 +92,16 @@ module.exports = function makeWebpackConfig() {
       use: [{ loader: 'babel-loader' }],
       exclude: /node_modules/
     }, {
-      // CSS LOADER
-      // Reference: https://github.com/webpack/css-loader
-      // Allow loading css through js
-      //
-      // Reference: https://github.com/postcss/postcss-loader
-      // Postprocess your css with PostCSS plugins
-      test: /\.css$/,
-      // Reference: https://github.com/webpack/extract-text-webpack-plugin
-      // Extract css files in production builds
-      //
-      // Reference: https://github.com/webpack/style-loader
-      // Use style-loader in development.
-
-      loader: isTest ? 'null-loader' : ExtractTextPlugin.extract({
-        fallback: 'style-loader',
-        use: [
-          { loader: 'css-loader', query: { sourceMap: true } },
-          { loader: 'postcss-loader' }
-        ],
-      })
+      test: /\.css$/i,
+      use: [
+        {
+          loader: MiniCssExtractPlugin.loader,
+          options: {
+            esModule: true,
+          },
+        },
+        'css-loader',
+      ],
     }, {
       // ASSET LOADER
       // Reference: https://github.com/webpack/file-loader
@@ -116,13 +110,13 @@ module.exports = function makeWebpackConfig() {
       // Pass along the updated reference to your code
       // You can add here any file extension you want to get copied to your output
       test: /\.(png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot)$/,
-      loader: 'file-loader'
+      use: [{ loader: 'file-loader' }]
     }, {
       // HTML LOADER
       // Reference: https://github.com/webpack/raw-loader
       // Allow loading html through js
       test: /\.html$/,
-      loader: 'raw-loader'
+      use: [{ loader: 'raw-loader' }]
     }]
   };
 
@@ -142,31 +136,6 @@ module.exports = function makeWebpackConfig() {
     })
   }
 
-  /**
-   * PostCSS
-   * Reference: https://github.com/postcss/autoprefixer-core
-   * Add vendor prefixes to your css
-   */
-  // NOTE: This is now handled in the `postcss.config.js`
-  //       webpack2 has some issues, making the config file necessary
-
-  /**
-   * Plugins
-   * Reference: http://webpack.github.io/docs/configuration.html#plugins
-   * List: http://webpack.github.io/docs/list-of-plugins.html
-   */
-  config.plugins = [
-    new CleanWebpackPlugin(),
-    new webpack.LoaderOptionsPlugin({
-      test: /\.scss$/i,
-      options: {
-        postcss: {
-          plugins: [autoprefixer]
-        }
-      }
-    })
-  ];
-
   // Skip rendering index.html in test mode
   if (!isTest) {
     // Reference: https://github.com/ampedandwired/html-webpack-plugin
@@ -176,34 +145,20 @@ module.exports = function makeWebpackConfig() {
         template: './src/public/index.html',
         inject: 'body'
       }),
-
-      // Reference: https://github.com/webpack/extract-text-webpack-plugin
-      // Extract css files
-      // Disabled when in test mode or not in build mode
-      new ExtractTextPlugin({ filename: 'css/[name].css', disable: !isProd, allChunks: true })
+      new MiniCssExtractPlugin({
+        filename: 'css/[name].css'
+      })
     )
   }
 
   // Add build specific plugins
   if (isProd) {
     config.plugins.push(
-      // Reference: http://webpack.github.io/docs/list-of-plugins.html#noerrorsplugin
-      // Only emit files when there are no errors
-      // new webpack.NoEmitOnErrorsPlugin(),
-
-      // // // Reference: http://webpack.github.io/docs/list-of-plugins.html#uglifyjsplugin
-      // // // Minify all javascript, switch loaders to minimizing mode
-      // new webpack.optimize.UglifyJsPlugin({
-      //   sourceMap: true
-      // }),
-
-      // Copy assets from the public folder
-      // Reference: https://github.com/kevlened/copy-webpack-plugin
-      new CopyPlugin([
-        {
-          from: 'src/public/img', to: 'dist'
-        },
-      ]),
+      // new CleanWebpackPlugin(['dist/*']) for < v2 versions of CleanWebpackPlugin
+      new CleanWebpackPlugin(),
+      new HtmlWebpackPlugin({
+        title: 'Production',
+      }),
     )
   }
 
@@ -213,9 +168,15 @@ module.exports = function makeWebpackConfig() {
    * Reference: http://webpack.github.io/docs/webpack-dev-server.html
    */
   config.devServer = {
+    // fica escutando as modificações de código
+    watchContentBase: true,
+    // abre o navegado
+    open: true,
+    // arquivo onde está os arquivos
     contentBase: './src/public',
-    stats: 'minimal',
-    host: '0.0.0.0'
+    // stats: 'minimal',
+    compress: true,
+    port: 9000,
   };
 
   return config;

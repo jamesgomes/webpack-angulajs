@@ -154,7 +154,6 @@ module.exports = function makeWebpackConfig() {
   // Add build specific plugins
   if (isProd) {
     config.plugins.push(
-      // new CleanWebpackPlugin(['dist/*']) for < v2 versions of CleanWebpackPlugin
       new CleanWebpackPlugin(),
       new HtmlWebpackPlugin({
         title: 'Production',

@@ -4,6 +4,7 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
 const path = require('path');
 /**
  * Env
@@ -52,10 +53,10 @@ module.exports = function makeWebpackConfig() {
   };
 
   /**
-   * Devtool
-   * Reference: http://webpack.github.io/docs/configuration.html#devtool
-   * Mapeamento de origem
-   */
+    * Devtool
+    * Reference: http://webpack.github.io/docs/configuration.html#devtool
+    * Mapeamento de origem
+    */
   if (isTest) {
     config.devtool = 'inline-source-map';
   }
@@ -102,7 +103,7 @@ module.exports = function makeWebpackConfig() {
       // Pass along the updated reference to your code
       // You can add here any file extension you want to get copied to your output
       test: /\.(png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot)$/,
-      use: ['file-loader']
+      use: ['file-loader?outputPath=img/']
     }, {
       // HTML LOADER
       // https://github.com/webpack-contrib/html-loader
@@ -135,21 +136,17 @@ module.exports = function makeWebpackConfig() {
     // Reference: https://github.com/ampedandwired/html-webpack-plugin
     // Render index.html
     config.plugins.push(
+      new CleanWebpackPlugin(),
       new HtmlWebpackPlugin({
         template: './src/public/index.html',
         inject: 'body'
       }),
       new MiniCssExtractPlugin({
         filename: 'css/[name].css'
-      })
-    )
-  }
-
-  // Add build specific plugins
-  if (isProd) {
-    config.plugins.push(
-      new CleanWebpackPlugin(),
-      new HtmlWebpackPlugin(),
+      }),
+      new CopyPlugin([
+        { from: './src/public/img', to: 'img' },
+      ]),
     )
   }
 

@@ -4,7 +4,7 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-
+const path = require('path');
 /**
  * Env
  * Busca o clico de vida no NPM para identificar o ambiente.
@@ -43,11 +43,7 @@ module.exports = function makeWebpackConfig() {
    */
   config.output = isTest ? {} : {
     // Diretório de saída
-    path: __dirname + '/dist',
-
-    // Caminho de saída para visualização da página
-    // Usa o webpack-dev-server no desenvolvimento
-    publicPath: '/',
+    path: path.resolve(__dirname, 'dist'),
 
     // Nome do aquivo
     // Adiciona hash apenas no modo de produção
@@ -106,7 +102,7 @@ module.exports = function makeWebpackConfig() {
       // Pass along the updated reference to your code
       // You can add here any file extension you want to get copied to your output
       test: /\.(png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot)$/,
-      use: [{ loader: 'file-loader' }]
+      use: ['file-loader']
     }, {
       // HTML LOADER
       // https://github.com/webpack-contrib/html-loader
@@ -130,6 +126,8 @@ module.exports = function makeWebpackConfig() {
       enforce: 'post',
       exclude: /node_modules|\.spec\.js$/,
     })
+
+    config.plugins.push(new MiniCssExtractPlugin());
   }
 
   // Skip rendering index.html in test mode

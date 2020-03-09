@@ -1,12 +1,9 @@
 'use strict';
 
 // Modules
-const webpack = require('webpack');
-const autoprefixer = require('autoprefixer');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const CopyPlugin = require('copy-webpack-plugin');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 /**
  * Env
@@ -23,7 +20,7 @@ module.exports = function makeWebpackConfig() {
    * Este é o objeto em que toda a configuração é definida
    */
   var config = {
-    plugins: [new MiniCssExtractPlugin()],
+    plugins: [],
   };
 
   config.mode = isProd ? 'production' : 'development';
@@ -56,7 +53,6 @@ module.exports = function makeWebpackConfig() {
     // Adiciona hash apenas no modo de produção
     filename: isProd ? '[name].[hash].js' : '[name].bundle.js',
     chunkFilename: isProd ? '[name].[hash].js' : '[name].bundle.js'
-
   };
 
   /**
@@ -89,8 +85,8 @@ module.exports = function makeWebpackConfig() {
       // Transpile .js files using babel-loader
       // Compiles ES6 and ES7 into ES5 code
       test: /\.js$/,
-      use: [{ loader: 'babel-loader' }],
-      exclude: /node_modules/
+      exclude: /node_modules/,
+      loader: "babel-loader"
     }, {
       test: /\.css$/i,
       use: [
@@ -113,10 +109,10 @@ module.exports = function makeWebpackConfig() {
       use: [{ loader: 'file-loader' }]
     }, {
       // HTML LOADER
-      // Reference: https://github.com/webpack/raw-loader
-      // Allow loading html through js
-      test: /\.html$/,
-      use: [{ loader: 'raw-loader' }]
+      // https://github.com/webpack-contrib/html-loader
+      // Permitir o carregamento de html através de js
+      test: /\.html$/i,
+      loader: 'html-loader',
     }]
   };
 
@@ -155,9 +151,7 @@ module.exports = function makeWebpackConfig() {
   if (isProd) {
     config.plugins.push(
       new CleanWebpackPlugin(),
-      new HtmlWebpackPlugin({
-        title: 'Production',
-      }),
+      new HtmlWebpackPlugin(),
     )
   }
 
